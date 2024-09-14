@@ -1,7 +1,9 @@
+import { v4 as uuidv4 } from "uuid";
+
 import { Todo } from "~/todo/models/Todo";
 import { TodoTitle } from "~/todo/models/TodoTitle";
+
 import type { TodoRepository } from "~/todo/repositories/TodoRepository";
-import { v4 as uuidv4 } from "uuid";
 
 export class TodoService {
 	constructor(private readonly todoRepository: TodoRepository) {}
