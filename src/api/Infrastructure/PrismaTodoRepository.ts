@@ -1,7 +1,9 @@
 import { Todo } from "~/todo/models/Todo";
 import { TodoTitle } from "~/todo/models/TodoTitle";
-import type { TodoRepository } from "~/todo/repositories/TodoRepository";
+
 import { prisma } from "./PrismaClient";
+
+import type { TodoRepository } from "~/todo/repositories/TodoRepository";
 
 export class PrismaTodoRepository implements TodoRepository {
 	async save(todo: Todo): Promise<void> {
@@ -27,7 +29,9 @@ export class PrismaTodoRepository implements TodoRepository {
 			where: { id },
 		});
 
-		if (!todoData) return null;
+		if (!todoData) {
+			return null;
+		}
 
 		return Todo.reconstruct(
 			todoData.id,
