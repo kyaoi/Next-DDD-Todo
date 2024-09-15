@@ -21,6 +21,18 @@
           "object",
           "type"
         ],
+        "pathGroups": [
+          {
+            "pattern": "~/**",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "{.,..}/**/*.ts",
+            "group": "type",
+            "position": "after"
+          }
+        ],
         "newlines-between": "always",
         "pathGroupsExcludedImportTypes": [
           "builtin"

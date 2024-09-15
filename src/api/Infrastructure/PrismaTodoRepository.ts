@@ -1,9 +1,11 @@
-import { Todo } from "~/todo/models/Todo";
-import { TodoTitle } from "~/todo/models/TodoTitle";
+import type { Todo } from "~/todo/models/Todo";
+import type { TodoRepository } from "~/todo/repositories/TodoRepository";
+
+import { toDTO, toDomain } from "../Application/TodoMapper";
 
 import { prisma } from "./PrismaClient";
 
-import type { TodoRepository } from "~/todo/repositories/TodoRepository";
+import type { TodoDTO } from "../Application/TodoDTO";
 
 export class PrismaTodoRepository implements TodoRepository {
 	async save(todo: Todo): Promise<void> {
@@ -24,7 +26,7 @@ export class PrismaTodoRepository implements TodoRepository {
 		});
 	}
 
-	async findById(id: string): Promise<Todo | null> {
+	async findById(id: string): Promise<TodoDTO | null> {
 		const todoData = await prisma.todo.findUnique({
 			where: { id },
 		});
@@ -33,23 +35,30 @@ export class PrismaTodoRepository implements TodoRepository {
 			return null;
 		}
 
-		return Todo.reconstruct(
-			todoData.id,
-			TodoTitle.create(todoData.title),
-			todoData.completed,
-		);
+		const todo = toDomain({
+			id: todoData.id,
+			title: todoData.title,
+			completed: todoData.completed,
+			createdAt: todoData.createdAt,
+			updatedAt: todoData.updatedAt,
+		});
+
+		return toDTO(todo);
 	}
 
-	async findAll(): Promise<Todo[]> {
+	async findAll(): Promise<TodoDTO[]> {
 		const todosData = await prisma.todo.findMany();
 
-		return todosData.map((todoData) =>
-			Todo.reconstruct(
-				todoData.id,
-				TodoTitle.create(todoData.title),
-				todoData.completed,
-			),
-		);
+		return todosData.map((todoData) => {
+			const todo = toDomain({
+				id: todoData.id,
+				title: todoData.title,
+				completed: todoData.completed,
+				createdAt: todoData.createdAt,
+				updatedAt: todoData.updatedAt,
+			});
+			return toDTO(todo); // 各エンティティをDTOに変換
+		});
 	}
 
 	async update(todo: Todo): Promise<void> {
