@@ -6,8 +6,6 @@ import { PrismaTodoRepository } from "~/api/Infrastructure/PrismaTodoRepository"
 const todoService = new TodoService(new PrismaTodoRepository());
 
 export async function PUT(_: Request, { params }: { params: { id: string } }) {
-	console.log("params", params);
-
 	try {
 		await todoService.toggleTodoCompletion(params.id);
 		return NextResponse.json(

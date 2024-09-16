@@ -14,14 +14,18 @@ export class PrismaTodoRepository implements TodoRepository {
 			create: {
 				id: todo.getId(),
 				title: todo.getTitle().value,
+				content: todo.getContent().value,
 				completed: todo.getCompleted(),
 				createdAt: new Date(),
 				updatedAt: new Date(),
+				dueDate: todo.getDueDate(),
 			},
 			update: {
 				title: todo.getTitle().value,
+				content: todo.getContent().value,
 				completed: todo.getCompleted(),
 				updatedAt: new Date(),
+				dueDate: todo.getDueDate(),
 			},
 		});
 	}
@@ -38,26 +42,30 @@ export class PrismaTodoRepository implements TodoRepository {
 		const todo = toDomain({
 			id: todoData.id,
 			title: todoData.title,
+			content: todoData.content,
 			completed: todoData.completed,
 			createdAt: todoData.createdAt,
 			updatedAt: todoData.updatedAt,
+			dueDate: todoData.dueDate,
 		});
 
 		return toDTO(todo);
 	}
 
 	async findAll(): Promise<TodoDTO[]> {
-		const todosData = await prisma.todo.findMany();
+		const todoDatas = await prisma.todo.findMany();
 
-		return todosData.map((todoData) => {
+		return todoDatas.map((todoData) => {
 			const todo = toDomain({
 				id: todoData.id,
 				title: todoData.title,
+				content: todoData.content,
 				completed: todoData.completed,
 				createdAt: todoData.createdAt,
 				updatedAt: todoData.updatedAt,
+				dueDate: todoData.dueDate,
 			});
-			return toDTO(todo); // 各エンティティをDTOに変換
+			return toDTO(todo);
 		});
 	}
 
@@ -66,8 +74,10 @@ export class PrismaTodoRepository implements TodoRepository {
 			where: { id: todo.getId() },
 			data: {
 				title: todo.getTitle().value,
+				content: todo.getContent().value,
 				completed: todo.getCompleted(),
 				updatedAt: new Date(),
+				dueDate: todo.getDueDate(),
 			},
 		});
 	}
