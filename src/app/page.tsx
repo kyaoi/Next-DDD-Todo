@@ -1,11 +1,12 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
 import type { TodoDTO } from "~/api/Application/TodoDTO";
+import { TodoDialog, TodoTab } from "~/components/todo";
 
 export default function Home() {
 	const [todos, setTodos] = useState<TodoDTO[]>([]);
-	const [newTodo, setNewTodo] = useState("");
 	const [error, setError] = useState("");
 
 	useEffect(() => {
@@ -20,72 +21,21 @@ export default function Home() {
 			}
 			const data: TodoDTO[] = await response.json();
 			const sortedTodos = data.sort((a, b) => {
+				const isPastA = new Date(a.dueDate).getTime() < new Date().getTime();
+				const isPastB = new Date(b.dueDate).getTime() < new Date().getTime();
+
 				if (a.completed !== b.completed) {
 					return a.completed ? 1 : -1;
 				}
-				return (
-					new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-				);
+
+				if (isPastA !== isPastB) {
+					return isPastA ? -1 : 1;
+				}
+
+				return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
 			});
 			setTodos(sortedTodos);
-		} catch (err) {
-			if (err instanceof Error) {
-				setError(err.message);
-			} else {
-				setError("An unknown error occurred");
-			}
-		}
-	};
-
-	const createTodo = async () => {
-		try {
-			const response = await fetch("/api/todo", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ title: newTodo }),
-			});
-			if (!response.ok) {
-				throw new Error("Failed to create todo");
-			}
-			setNewTodo("");
-			fetchTodos();
-		} catch (err) {
-			if (err instanceof Error) {
-				setError(err.message);
-			} else {
-				setError("An unknown error occurred");
-			}
-		}
-	};
-
-	const toggleCompletion = async (id: string) => {
-		try {
-			const response = await fetch(`/api/todo/${id}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-			});
-			if (!response.ok) {
-				throw new Error("Failed to toggle todo completion");
-			}
-			fetchTodos();
-		} catch (err) {
-			if (err instanceof Error) {
-				setError(err.message);
-			} else {
-				setError("An unknown error occurred");
-			}
-		}
-	};
-
-	const deleteTodo = async (id: string) => {
-		try {
-			const response = await fetch(`/api/todo/${id}`, {
-				method: "DELETE",
-			});
-			if (!response.ok) {
-				throw new Error("Failed to delete todo");
-			}
-			fetchTodos();
+			setError("");
 		} catch (err) {
 			if (err instanceof Error) {
 				setError(err.message);
@@ -102,61 +52,9 @@ export default function Home() {
 
 				{error && <p className="text-red-500 mb-4">{error}</p>}
 
-				<ul className="space-y-4">
-					{todos.map((todo) => (
-						<li
-							className={`flex items-center justify-between p-4 rounded-lg shadow-sm ${
-								todo.completed ? "bg-green-100" : "bg-red-100"
-							}`}
-							key={todo.id}
-						>
-							<div className="flex items-center">
-								<input
-									checked={todo.completed}
-									className="mr-4 cursor-pointer "
-									onChange={() => toggleCompletion(todo.id)}
-									type="checkbox"
-								/>
-								<span
-									className={`text-lg ${todo.completed ? "line-through" : ""}`}
-								>
-									{todo.title}
-								</span>
-							</div>
-							<div className="flex">
-								<button
-									className="text-red-500 hover:text-red-700 ml-4"
-									onClick={() => deleteTodo(todo.id)}
-									type="button"
-								>
-									Delete
-								</button>
-							</div>
-						</li>
-					))}
-				</ul>
+				<TodoTab fetchTodos={fetchTodos} setError={setError} todos={todos} />
 
-				<div className="mt-6 flex">
-					<input
-						className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-						onChange={(e) => setNewTodo(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								createTodo();
-							}
-						}}
-						placeholder="New Todo"
-						type="text"
-						value={newTodo}
-					/>
-					<button
-						className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-						onClick={createTodo}
-						type="button"
-					>
-						Add
-					</button>
-				</div>
+				<TodoDialog error={error} fetchTodos={fetchTodos} setError={setError} />
 			</div>
 		</div>
 	);
