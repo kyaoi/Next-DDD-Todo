@@ -29,6 +29,12 @@
       "~/todo/*": [
         "./src/api/Domain/todo/*"
       ],
+      "~/shared/*": [
+        "./src/api/shared/*"
+      ],
+      "~/components/*": [
+        "./src/components/*"
+      ]
     }
   },
   "include": [
